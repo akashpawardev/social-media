@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Register() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [newUserAdded, setNewUserAdded] = useState();
+    const navigate = useNavigate(); 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:3000/api/register', {
+            const response = await fetch('http://localhost:3000/api/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // Specify JSON content type
@@ -18,13 +20,12 @@ function Register() {
                 body: JSON.stringify({ username, email, password }), // Send data as JSON string
             });
 
-            if (response.ok) {
-                console.log('Registration successful!');
-                // Handle success (redirect, show message, etc.)
-            } else {
-                console.error('Registration failed');
-                // Handle failure
+            if (!response.ok) {
+                throw new Error('Registration failed');
             }
+            setNewUserAdded(true);
+            navigate("/login");
+            // return (<Navigate to="/" replace={true} />)
         } catch (error) {
             console.error('Error registering user:', error);
         }
@@ -33,6 +34,12 @@ function Register() {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="w-full max-w-md p-6 bg-white rounded shadow-md">
+                <h1 className="text-3xl font-semibold mb-4">Add New User</h1>
+                {newUserAdded && (
+                    <p className="bg-green-100 text-green-800 rounded-md p-2 mb-4">
+                        New User added successfully!
+                    </p>
+                )}
                 <form onSubmit={handleSubmit}>
                     <label>
                         Username:
@@ -50,8 +57,8 @@ function Register() {
                             placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </label>
                     <Link to="/login">
-                        <button type="submit" className="mt-3 w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">Register</button>
                     </Link>
+                    <button type="submit" className="mt-3 w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">Register</button>
                 </form>
             </div>
         </div >

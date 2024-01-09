@@ -1,7 +1,9 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const dotenv = require('dotenv').config;
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 
 const MONGO_URL = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB URI
 const dbName = 'social'; // Replace with your database name
@@ -47,11 +49,11 @@ app.use(express.json());
 
 
 // Example endpoint to perform MongoDB operations
-app.post('/api/register', async (req, res) => {
+app.post('/api/users', async (req, res) => {
   try {
-    if (!db) {
-      return res.status(500).json({ error: 'Database connection error' });
-    }
+    // if (!db) {
+    //   return res.status(500).json({ error: 'Database connection error' });
+    // }
 
     const collection = db.collection('users'); // Replace 'users' with your collection name
     const { username, email, password } = req.body;
@@ -61,8 +63,7 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'Username or email already exists' });
     }
 
-    await collection.insertOne({ username, email, password }); // Hash the password before saving!
-
+    await collection.insertOne({ username, email, password }); 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error('Error registering user:', err);
@@ -74,12 +75,14 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    const collection = db.collection('users');
+    const e = await collection.findOne({email:email})
+    const pass = await collection.find(e.password)
     // Check credentials against your database or authentication service
     // Implement your logic to validate the user's login credentials here
     // For example, check if the email and password match a user in the database
 
-    if (email === 'example@example.com' && password === 'password') {
+    if (email == e && password == pass) {
       // Authentication successful
       res.status(200).json({ message: 'Login successful' });
     } else {
@@ -144,6 +147,6 @@ app.post('/api/posts/:id/comments', (req, res) => {
   res.json({ message: 'Comment added successfully' });
 });
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log('Server is running on port 3000');
 });
